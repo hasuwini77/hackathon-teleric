@@ -7,56 +7,57 @@ const courses = [
     title: "React Fundamentals",
     duration: "8 hours",
     level: "Beginner",
-    color: "#14d9f5",
+    color: "#8b5cf6",
   },
   {
     title: "TypeScript Deep Dive",
     duration: "12 hours",
     level: "Intermediate",
-    color: "#ffb347",
+    color: "#6366f1",
   },
   {
     title: "Next.js 15 Mastery",
     duration: "10 hours",
     level: "Advanced",
-    color: "#14d9f5",
+    color: "#7c3aed",
   },
 ];
 
 export default function SuggestedCourses() {
   return (
     <div>
-      <h3 className="font-bold text-sm mb-4" style={{ color: "var(--color-foreground)" }}>
+      <h3 className="font-bold text-base mb-5 tracking-tight" style={{ color: "var(--color-foreground)", fontFamily: "var(--font-display)", lineHeight: "1.2" }}>
         Suggested for You
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {courses.map((course, idx) => (
           <div
             key={idx}
-            className="p-4 rounded-xl border transition-all hover:scale-[1.02] cursor-pointer"
+            className="p-5 rounded-2xl border transition-all hover:scale-[1.01] cursor-pointer group"
             style={{
               backgroundColor: "var(--color-card)",
               borderColor: "var(--color-border)",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-4">
               <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${course.color}20` }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                style={{ backgroundColor: `${course.color}15` }}
               >
                 <BookOpen className="w-5 h-5" style={{ color: course.color }} />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-sm mb-1" style={{ color: "var(--color-foreground)" }}>
+                <h4 className="font-semibold text-sm mb-2 tracking-tight" style={{ color: "var(--color-foreground)", lineHeight: "1.3" }}>
                   {course.title}
                 </h4>
-                <div className="flex items-center gap-3 text-xs" style={{ color: "var(--color-muted-foreground)" }}>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+                <div className="flex items-center gap-4 text-xs" style={{ color: "var(--color-muted-foreground)" }}>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
                     {course.duration}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <BarChart3 className="w-3 h-3" />
+                  <span className="flex items-center gap-1.5">
+                    <BarChart3 className="w-3.5 h-3.5" />
                     {course.level}
                   </span>
                 </div>

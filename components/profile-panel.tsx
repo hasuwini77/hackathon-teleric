@@ -70,57 +70,58 @@ export default function ProfilePanel({
           borderColor: "var(--color-border)",
         }}
       >
-        <div className="p-5 border-b" style={{ borderColor: "var(--color-border)" }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4" style={{ color: "var(--color-primary)" }} />
-            <h2 className="font-bold text-sm" style={{ color: "var(--color-foreground)" }}>
+        <div className="p-6 border-b" style={{ borderColor: "var(--color-border)" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
+            <h2 className="font-bold text-base tracking-tight" style={{ color: "var(--color-foreground)", fontFamily: "var(--font-display)", lineHeight: "1.2" }}>
               Your Profile
             </h2>
           </div>
-          <p className="text-xs mb-3" style={{ color: "var(--color-muted-foreground)" }}>
-            Build your learning profile
+          <p className="text-xs mb-5" style={{ color: "var(--color-muted-foreground)", lineHeight: "1.5" }}>
+            Build your personalized learning journey
           </p>
           
           <button
             onClick={onDigest}
             disabled={isDigesting}
-            className="w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
              style={{
-              backgroundColor: "var(--color-primary)",
+              background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)",
               color: "var(--color-primary-foreground)",
+              boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)",
             }}
           >
             {isDigesting ? (
                 <>
-                <Sparkles className="w-3 h-3 animate-spin"/>
-                Digesting...
+                <Sparkles className="w-4 h-4 animate-spin"/>
+                Analyzing Profile...
                 </>
             ) : (
                 <>
-                <Sparkles className="w-3 h-3"/>
-                Digest & Analyze CV
+                <Sparkles className="w-4 h-4"/>
+                Generate Recommendations
                 </>
             )}
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
           {/* Skills */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <User className="w-4 h-4" style={{ color: "var(--color-primary)" }} />
-              <label className="text-sm font-semibold" style={{ color: "var(--color-foreground)" }}>
+              <label className="text-sm font-semibold" style={{ color: "var(--color-foreground)", fontFamily: "var(--font-display)" }}>
                 Skills
               </label>
             </div>
-            <div className="flex gap-2 mb-2">
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && addSkill()}
                 placeholder="Add a skill..."
-                className="flex-1 px-3 py-2 text-sm rounded-lg border outline-none focus:ring-2"
+                className="flex-1 px-4 py-2.5 text-sm rounded-xl border outline-none focus:ring-2 transition-all"
                 style={{
                   backgroundColor: "var(--color-card)",
                   borderColor: "var(--color-border)",
@@ -129,7 +130,7 @@ export default function ProfilePanel({
               />
               <button
                 onClick={addSkill}
-                className="p-2 rounded-lg"
+                className="p-2.5 rounded-xl transition-all hover:scale-105"
                 style={{
                   backgroundColor: "var(--color-primary)",
                   color: "var(--color-primary-foreground)",
@@ -142,15 +143,15 @@ export default function ProfilePanel({
               {profile.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="px-3 py-1 text-xs rounded-full flex items-center gap-1.5 border"
+                  className="px-3 py-1.5 text-xs rounded-lg flex items-center gap-2 border transition-all hover:scale-105"
                   style={{
-                    backgroundColor: "var(--color-secondary)",
-                    borderColor: "var(--color-border)",
+                    backgroundColor: "rgba(139, 92, 246, 0.08)",
+                    borderColor: "rgba(139, 92, 246, 0.2)",
                     color: "var(--color-foreground)",
                   }}
                 >
                   {skill}
-                  <button onClick={() => removeSkill(skill)} className="hover:opacity-70">
+                  <button onClick={() => removeSkill(skill)} className="hover:opacity-70 transition-opacity">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -160,16 +161,16 @@ export default function ProfilePanel({
 
           {/* Experience */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <Briefcase className="w-4 h-4" style={{ color: "var(--color-primary)" }} />
-              <label className="text-sm font-semibold" style={{ color: "var(--color-foreground)" }}>
+              <label className="text-sm font-semibold" style={{ color: "var(--color-foreground)", fontFamily: "var(--font-display)" }}>
                 Experience Level
               </label>
             </div>
             <select
               value={profile.experience}
               onChange={(e) => onProfileChange({ ...profile, experience: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border outline-none focus:ring-2"
+              className="w-full px-4 py-2.5 text-sm rounded-xl border outline-none focus:ring-2 transition-all"
               style={{
                 backgroundColor: "var(--color-card)",
                 borderColor: "var(--color-border)",
@@ -186,9 +187,9 @@ export default function ProfilePanel({
 
           {/* Goals */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <Target className="w-4 h-4" style={{ color: "var(--color-primary)" }} />
-              <label className="text-sm font-semibold" style={{ color: "var(--color-foreground)" }}>
+              <label className="text-sm font-semibold" style={{ color: "var(--color-foreground)", fontFamily: "var(--font-display)" }}>
                 Learning Goals
               </label>
             </div>
@@ -197,11 +198,12 @@ export default function ProfilePanel({
               onChange={(e) => onProfileChange({ ...profile, goals: e.target.value })}
               placeholder="What do you want to achieve?"
               rows={4}
-              className="w-full px-3 py-2 text-sm rounded-lg border outline-none focus:ring-2 resize-none"
+              className="w-full px-4 py-3 text-sm rounded-xl border outline-none focus:ring-2 resize-none transition-all"
               style={{
                 backgroundColor: "var(--color-card)",
                 borderColor: "var(--color-border)",
                 color: "var(--color-foreground)",
+                lineHeight: "1.5",
               }}
             />
           </div>
