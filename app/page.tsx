@@ -23,6 +23,8 @@ export default function Page() {
     experience: "",
     goals: "",
     linkedinSummary: "",
+    cvFile: null,
+    linkedinUrl: "",
   });
   const { isSpeaking, speak } = useSpeech();
   const [isDigesting, setIsDigesting] = useState(false);
@@ -38,8 +40,8 @@ export default function Page() {
   };
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
-      <div className="mx-auto flex min-h-screen max-w-[1400px] flex-col">
+    <main className="h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)' }}>
+      <div className="mx-auto flex h-full max-w-[1400px] flex-col">
         {/* Top bar */}
         <header className="flex items-center justify-between px-6 py-5 border-b shrink-0" style={{ borderColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-3">
@@ -80,7 +82,7 @@ export default function Page() {
 
           {/* Center: Chat */}
           <div className="flex-1 flex flex-col min-w-0 border-t lg:border-t-0" style={{ borderColor: 'var(--color-border)' }}>
-            <ChatPanel profile={profile} speak={speak} />
+            <ChatPanel profile={profile} onProfileChange={setProfile} speak={speak} />
           </div>
 
           {/* Right: 3D Avatar + Courses */}
