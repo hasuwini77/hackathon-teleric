@@ -191,6 +191,44 @@ export function LearningPathChat() {
             </div>
           )}
 
+          {agent?.getMemory().relevant_skills &&
+            agent.getMemory().relevant_skills.length > 0 && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Skills You Have
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {agent.getMemory().relevant_skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-1 rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {agent?.getMemory().required_skills &&
+            agent.getMemory().required_skills.length > 0 && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Skills to Learn
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {agent.getMemory().required_skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
           {Object.keys(agent?.getMemory().constraints || {}).length > 0 && (
             <div>
               <label className="text-sm font-medium mb-2 block">

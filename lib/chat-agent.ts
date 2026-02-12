@@ -8,6 +8,8 @@ export interface AgentMemory {
   relevant_experience: string | null;
   background: string | null;
   skill_level: string | null;
+  relevant_skills: string[];
+  required_skills: string[];
   constraints: {
     time_per_week: string | null;
     deadline: string | null;
@@ -67,6 +69,8 @@ export class LearningPathAgent {
       relevant_experience: null,
       background: null,
       skill_level: null,
+      relevant_skills: [],
+      required_skills: [],
       constraints: {
         time_per_week: null,
         deadline: null,
@@ -161,6 +165,21 @@ Guidelines:
       contextParts.push(`Interests: ${this.memory.interests.join(", ")}`);
     }
 
+    if (this.memory.relevant_skills.length > 0) {
+      contextParts.push(
+        `Skills User Already Has: ${this.memory.relevant_skills.join(", ")}`,
+      );
+    }
+
+    if (this.memory.required_skills.length > 0) {
+      contextParts.push(
+        `Required Skills to Learn: ${this.memory.required_skills.join(", ")}`,
+      );
+      contextParts.push(
+        `IMPORTANT: Focus the learning path on the required skills. Do NOT include skills the user already has.`,
+      );
+    }
+
     if (
       this.memory.constraints.time_per_week ||
       this.memory.constraints.deadline
@@ -215,6 +234,14 @@ Guidelines:
         content: `Extract structured information from the user's message.
 Fill in any new information clearly stated or strongly implied.
 Use null for missing strings, [] for empty arrays, {} for empty objects.
+
+IMPORTANT - Skills extraction:
+- relevant_skills: Skills the user ALREADY HAS or CURRENTLY KNOWS (e.g., "I know Python", "experienced in programming", "professional developer")
+- required_skills: Skills the user NEEDS TO LEARN or wants to acquire (e.g., "want to learn ML", "need to understand RL", "looking to master AI")
+- When extracting from experience/background, put known skills in relevant_skills
+- When extracting from objectives/goals, put target skills in required_skills
+- Be specific and granular with skill names
+
 Set learning_path_detected to true if the assistant's response contains a structured learning path.`,
       },
       { role: "user", content: text },
@@ -246,6 +273,8 @@ Set learning_path_detected to true if the assistant's response contains a struct
                   relevant_experience: { type: ["string", "null"] },
                   background: { type: ["string", "null"] },
                   skill_level: { type: ["string", "null"] },
+                  relevant_skills: { type: "array", items: { type: "string" } },
+                  required_skills: { type: "array", items: { type: "string" } },
                   interests: { type: "array", items: { type: "string" } },
                   constraints: {
                     type: "object",
@@ -263,6 +292,8 @@ Set learning_path_detected to true if the assistant's response contains a struct
                   "relevant_experience",
                   "background",
                   "skill_level",
+                  "relevant_skills",
+                  "required_skills",
                   "interests",
                   "constraints",
                   "learning_path_detected",
@@ -299,6 +330,20 @@ Set learning_path_detected to true if the assistant's response contains a struct
       }
       if (data.skill_level && !this.memory.skill_level) {
         this.memory.skill_level = data.skill_level;
+      }
+      if (data.relevant_skills) {
+        data.relevant_skills.forEach((skill: string) => {
+          if (skill && !this.memory.relevant_skills.includes(skill)) {
+            this.memory.relevant_skills.push(skill);
+          }
+        });
+      }
+      if (data.required_skills) {
+        data.required_skills.forEach((skill: string) => {
+          if (skill && !this.memory.required_skills.includes(skill)) {
+            this.memory.required_skills.push(skill);
+          }
+        });
       }
       if (data.interests) {
         data.interests.forEach((interest: string) => {
