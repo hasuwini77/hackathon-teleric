@@ -1,16 +1,13 @@
 # Quick Start Guide - Learning Path Advisor
 
-Get your AI-powered learning advisor up and running in 5 minutes!
+Get your AI-powered learning advisor up and running in 2 minutes!
 
-## 🚀 Fast Track Deployment (Docker)
+## 🚀 Local Development
 
-### 1️⃣ Clone & Setup (1 min)
+### 1️⃣ Install Dependencies (30 sec)
 
 ```bash
-cd /Users/ulf/hackathon-teleric
-
-# Copy environment template
-cp .env.example .env
+npm install
 ```
 
 ### 2️⃣ Configure API Key (30 sec)
@@ -18,156 +15,114 @@ cp .env.example .env
 1. Sign up at [openrouter.ai](https://openrouter.ai)
 2. Go to [Keys page](https://openrouter.ai/keys)
 3. Create new key and copy it
-4. Edit `.env` and replace `your_openrouter_api_key_here` with your actual key:
+4. Edit `.env.local` and add your key:
 
 ```bash
 OPENROUTER_API_KEY=sk-or-v1-YOUR-ACTUAL-KEY-HERE
 ```
 
-### 3️⃣ Start Services (2 min)
+### 3️⃣ Start Development Server (30 sec)
 
 ```bash
-docker-compose up -d
+npm run dev
 ```
-
-This will:
-- ✅ Start PostgreSQL database
-- ✅ Run database migrations
-- ✅ Seed initial data
-- ✅ Start FastAPI backend (port 5000)
-- ✅ Start Next.js frontend (port 3000)
-- ✅ Start pgAdmin (port 5050)
 
 ### 4️⃣ Open App (5 sec)
 
-Open http://localhost:3000 in your browser!
+Open http://localhost:3000/chat in your browser!
 
 ---
 
-## 📖 Production Deployment (Vercel + Neon)
+## 📖 Production Deployment (Vercel)
 
-### 1️⃣ Clone & Install (2 min)
-
-```bash
-cd /Users/ulf/hackathon-teleric
-npm install
-```
-
-### 2️⃣ Set Up Neon Database (1 min)
-
-1. Go to [neon.tech](https://neon.tech) and sign up
-2. Create a new project (any name)
-3. Copy the connection string from the dashboard
-
-### 3️⃣ Get OpenRouter API Key (1 min)
-
-1. Sign up at [openrouter.ai](https://openrouter.ai)
-2. Go to [Keys page](https://openrouter.ai/keys)
-3. Create new key and copy it
-
-### 4️⃣ Configure Environment (30 sec)
-
-Create `.env.local` file:
+### 1️⃣ Push to GitHub (1 min)
 
 ```bash
-cat > .env.local << 'EOF'
-DATABASE_URL=postgresql://your-connection-string-here
-OPENROUTER_API_KEY=sk-or-v1-your-key-here
-OPENAI_MODEL=openai/gpt-4o-mini
-EOF
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin YOUR_GITHUB_REPO_URL
+git push -u origin main
 ```
 
-Replace the placeholder values with your actual credentials.
+### 2️⃣ Deploy to Vercel (2 min)
 
-### 5️⃣ Deploy to Vercel (1 min)
+1. Go to [vercel.com](https://vercel.com) and sign in
+2. Click "Add New Project"
+3. Import your GitHub repository
+4. Add environment variable:
+   - Name: `OPENROUTER_API_KEY`
+   - Value: `sk-or-v1-your-actual-key`
+5. Click "Deploy"
 
-```bash
-npm i -g vercel
-vercel login
-vercel
+That's it! Your app is live.
+
+---
+
+## 🎯 Features
+
+- **Client-Side Agent**: Runs entirely in the browser with localStorage persistence
+- **Conversational AI**: Natural dialogue to understand your learning goals
+- **Memory Extraction**: Automatically extracts objectives, experience, and constraints
+- **Personalized Paths**: Creates 3-6 milestone learning plans with projects
+- **No Database Required**: Everything stored in browser localStorage
+- **Secure**: API key never exposed to client (kept on Next.js server)
+
+## 📁 Project Structure
+
+```
+app/
+  api/
+    openrouter/route.ts     # Proxy for OpenRouter API calls
+    learning-paths/route.ts # Learning path logging
+  chat/page.tsx             # Chat interface
+components/
+  learning-path-chat.tsx    # Main chat component
+lib/
+  chat-agent.ts             # Client-side agent with localStorage
 ```
 
-Follow the prompts:
+## 🔧 How It Works
 
-- Set up and deploy? **Y**
-- Which scope? (choose your account)
-- Link to existing project? **N**
-- What's your project's name? (press Enter for default)
-- In which directory is your code located? \*\*./` (press Enter)
+1. User opens `/chat` → Agent initialized with unique session ID
+2. Agent loads state from localStorage (or starts fresh)
+3. User sends message → Agent calls `/api/openrouter`
+4. Next.js API route forwards to OpenRouter (keeping API key secure)
+5. Response returned → Agent extracts structured info (objective, experience)
+6. Agent saves state to localStorage
+7. When ready → Agent generates personalized learning path
 
-Then add environment variables:
+## 💡 Tips
 
-```bash
-vercel env add DATABASE_URL
-# Paste your Neon connection string
+- **Persistence**: Conversation continues even after page reload
+- **Clear Session**: Open DevTools → Application → Local Storage → Delete items
+- **Cost**: Uses OpenRouter credits (~$0.001-0.01 per conversation)
+- **Models**: Default is `gpt-4o-mini` (fast & cheap), change in `.env.local`
 
-vercel env add OPENROUTER_API_KEY
-# Paste your OpenRouter key
+## 🚨 Troubleshooting
 
-vercel env add OPENAI_MODEL
-# Enter: openai/gpt-4o-mini
-```
+### "OpenRouter API request failed"
 
-Deploy again to use the new env vars:
+- Check your API key in `.env.local`
+- Verify you have credits at openrouter.ai/credits
 
-```bash
-vercel --prod
-```
+### "Agent initialization error"
 
-**Done!** 🎉 Your app is live at the URL shown.
+- Clear browser localStorage
+- Hard refresh (Cmd+Shift+R)
 
-## 🧪 Test Locally First
+### Chat not loading
 
-```bash
-# Install Vercel CLI if you haven't
-npm i -g vercel
+- Check browser console for errors
+- Ensure Next.js dev server is running (`npm run dev`)
 
-# Run development server
-vercel dev
+---
 
-# Visit http://localhost:3000/chat
-```
+## 📚 Next Steps
 
-## 📱 Using the Chat Interface
-
-1. Go to your deployed URL + `/chat`
-2. The agent will greet you
-3. Tell it what you want to learn
-4. Answer follow-up questions about:
-   - Your current experience
-   - Time availability
-   - Learning preferences
-5. Receive a personalized learning roadmap!
-
-## 🔧 Troubleshooting
-
-### "OPENROUTER_API_KEY not configured"
-
-- Run: `vercel env add OPENROUTER_API_KEY` and redeploy
-
-### "Database initialization failed"
-
-- Check your `DATABASE_URL` is correct
-- Ensure it ends with `?sslmode=require`
-- Verify Neon project is active
-
-### Function timeout
-
-- Check Vercel function logs: `vercel logs`
-- Consider upgrading OpenRouter model if too slow
-
-### Import errors in Python
-
-- Ensure `pyproject.toml` is in project root
-- Redeploy: `vercel --prod`
-
-## 💰 Cost Breakdown
-
-All on free tiers:
-
-- **Vercel**: Free (Hobby plan includes 100GB bandwidth)
-- **Neon**: Free (0.5GB storage, 3 compute hours/month)
-- **OpenRouter**: Pay-as-you-go (~$0.001/conversation with gpt-4o-mini)
+- Check out `CLIENT_AGENT.md` for detailed architecture
+- Customize the agent prompts in `lib/chat-agent.ts`
+- Add database persistence if needed (optional)
 
 Add $5 credit to OpenRouter to start chatting.
 
