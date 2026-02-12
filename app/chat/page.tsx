@@ -1,6 +1,6 @@
 "use client";
 
-import { LearningPathChat } from "@/components/learning-path-chat";
+import { LearningPathChat } from "@/components/agent-learning-path-chat";
 import { Brain } from "lucide-react";
 
 export default function ChatPage() {
