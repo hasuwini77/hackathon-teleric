@@ -39,6 +39,7 @@ export default function Page() {
     }, 4000);
   };
 
+
   return (
     <main className="h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)' }}>
       <div className="mx-auto flex h-full max-w-[1400px] flex-col">
