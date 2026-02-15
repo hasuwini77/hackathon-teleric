@@ -14,6 +14,25 @@ import {
   type ActionData,
 } from "@/lib/advisor-agent";
 import { SessionStore } from "@/lib/session-store";
+import { EnterpriseSignalChain } from "@/lib/enterprise-service";
+import { 
+  Briefcase, 
+  ChevronDown,
+  Sparkles,
+  ShieldCheck,
+  Code,
+  Palette,
+  Database,
+  Users
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Message {
   role: "user" | "assistant";
@@ -27,6 +46,7 @@ export function LearningPathChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [agent, setAgent] = useState<LearningPathAgent | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("default");
   const [, forceUpdate] = useState({}); // Force re-render when memory updates
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +74,10 @@ export function LearningPathChat() {
 
     try {
       const newAgent = new LearningPathAgent(targetSessionId);
+      
+      // Apply default enterprise context if it's a new or existing agent
+      EnterpriseSignalChain.apply(newAgent, "default");
+      
       setAgent(newAgent);
 
       const agentMessages = newAgent.getMessages();
@@ -77,6 +101,7 @@ export function LearningPathChat() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -165,6 +190,29 @@ export function LearningPathChat() {
     return `Gathering: ${missing.join(", ")}`;
   };
 
+  const handleRoleChange = (roleId: string) => {
+    if (!agent) return;
+    setSelectedRole(roleId);
+    EnterpriseSignalChain.apply(agent, roleId);
+    
+    // Add a system-like message to the UI to show the context change
+    const roleNames: Record<string, string> = {
+      "sr-frontend-123": "Senior Frontend Developer",
+      "jr-ux-456": "Junior UI/UX Designer",
+      "backend-ai-789": "Backend Engineer",
+      "cs-manager-000": "Customer Success Manager",
+      "default": "Default Profile"
+    };
+
+    setMessages(prev => [...prev, { 
+      role: "assistant", 
+      content: `*System: Enterprise context switched to ${roleNames[roleId]}. The agent now has access to your internal growth goals and history.*` 
+    }]);
+
+    // Force update to refresh the profile panel with seeded memory
+    forceUpdate({});
+  };
+
   return (
     <div className="flex gap-4 w-full max-w-6xl mx-auto">
       {/* Left Panel - Profile Form */}
@@ -213,7 +261,7 @@ export function LearningPathChat() {
                   Skills You Have
                 </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {agent.getMemory().relevant_skills.map((skill, idx) => (
+                  {agent.getMemory().relevant_skills.map((skill: string, idx: number) => (
                     <span
                       key={idx}
                       className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-1 rounded-full"
@@ -232,7 +280,7 @@ export function LearningPathChat() {
                   Skills to Learn
                 </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {agent.getMemory().required_skills.map((skill, idx) => (
+                  {agent.getMemory().required_skills.map((skill: string, idx: number) => (
                     <span
                       key={idx}
                       className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
@@ -273,11 +321,58 @@ export function LearningPathChat() {
       {/* Right Panel - Chat */}
       <Card className="flex flex-col h-[600px] flex-1">
         {/* Header */}
-        <div className="border-b p-4">
-          <h2 className="text-xl font-semibold">Learning Path Advisor</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Chat with the AI to build your learning path
-          </p>
+        <div className="border-b p-4 flex justify-between items-center bg-muted/30">
+          <div>
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Learning Path Advisor
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Personalized with Enterprise Context
+            </p>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm border-primary/20 hover:border-primary/50 transition-all">
+                <Briefcase className="h-4 w-4 text-primary" />
+                <span className="font-medium">
+                  {selectedRole === "default" ? "Demo Persona" : {
+                    "sr-frontend-123": "Senior Frontend",
+                    "jr-ux-456": "Junior UI/UX",
+                    "backend-ai-789": "Backend Engineer",
+                    "cs-manager-000": "Customer Success"
+                  }[selectedRole] || "Demo Persona"}
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Switch Enterprise Context</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleRoleChange("sr-frontend-123")}>
+                <Code className="mr-2 h-4 w-4" />
+                <span>Senior Frontend</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRoleChange("jr-ux-456")}>
+                <Palette className="mr-2 h-4 w-4" />
+                <span>Junior UI/UX</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRoleChange("backend-ai-789")}>
+                <Database className="mr-2 h-4 w-4" />
+                <span>Backend Engineer</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRoleChange("cs-manager-000")}>
+                <Users className="mr-2 h-4 w-4" />
+                <span>Customer Success</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleRoleChange("default")}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Default Profile</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Messages */}
