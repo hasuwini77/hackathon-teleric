@@ -85,6 +85,7 @@ const EXTRACTION_SCHEMA = {
 export class LearningPathAgent {
   private state: AgentState;
   private actions: AgentActions;
+  private enterpriseContext: string = "";
 
   constructor(sessionId: string) {
     this.state = new AgentState(sessionId);
@@ -101,6 +102,10 @@ export class LearningPathAgent {
       });
       this.state.addMessage({ role: "assistant", content: WELCOME_MESSAGE });
     }
+  }
+
+  public setEnterpriseContext(context: string): void {
+    this.enterpriseContext = context;
   }
 
   private getSystemPrompt(): string {
@@ -120,7 +125,11 @@ Guidelines:
 - The learning path should have 3-6 milestones with specific projects and resources
 - Keep the questions to a minimum and only ask for missing information that is essential to creating the minimum learning path`;
 
-    const contextParts = this.buildContextParts();
+    const contextParts = [
+      ...this.buildContextParts(),
+      this.enterpriseContext ? `INTERNAL DATA: ${this.enterpriseContext}` : "",
+    ].filter(Boolean);
+
     const context =
       "\n\nCurrent context:\n" + contextParts.map((p) => `- ${p}`).join("\n");
     return base + context;
