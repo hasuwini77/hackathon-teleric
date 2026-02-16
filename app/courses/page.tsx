@@ -1,12 +1,10 @@
 "use client";
 
-import CourseSidebar from "@/components/course-sidebar";
 import LearningPath from "@/components/learning-path";
 import SuggestedCourses from "@/components/suggested-courses";
 import {
   Play,
   Clock,
-  BarChart3,
   Flame,
   Trophy,
   Star,
@@ -21,10 +19,8 @@ import { Badge } from "@/components/ui/badge";
 
 export default function CoursesPage() {
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <CourseSidebar />
-
-      <main className="flex-1 overflow-y-auto scrollbar-thin bg-gradient-to-br from-primary/5 via-transparent to-accent/5">
+    <div className="h-full bg-background text-foreground overflow-y-auto scrollbar-thin">
+      <main className="bg-gradient-to-br from-primary/5 via-transparent to-accent/5 min-h-full">
         <div className="max-w-6xl mx-auto p-8 lg:p-12 space-y-12">
 
           {/* Hero Section */}

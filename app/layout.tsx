@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarNav } from "@/components/sidebar-nav";
 
 import "../styles/globals.css";
 
@@ -32,7 +33,12 @@ export default function RootLayout({
         className={`${_inter.variable} ${_spaceGrotesk.variable} min-h-screen font-sans antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          {children}
+          <div className="flex h-screen overflow-hidden">
+            <SidebarNav />
+            <div className="flex-1 overflow-hidden">
+              {children}
+            </div>
+          </div>
         </ThemeProvider>
       </body>
     </html>

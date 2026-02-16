@@ -58,7 +58,7 @@ export default function IntroducePage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground overflow-hidden">
+    <main className="h-full flex flex-col items-center justify-center p-6 bg-background text-foreground overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px]" />

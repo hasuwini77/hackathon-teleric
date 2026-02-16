@@ -5,7 +5,7 @@ import { Brain } from "lucide-react";
 
 export default function ChatPage() {
   return (
-    <main className="min-h-screen bg-background p-4 md:p-8">
+    <div className="h-full overflow-y-auto bg-background p-4 md:p-8">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -27,9 +27,9 @@ export default function ChatPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Powered by OpenRouter • Persistent conversations with Neon DB</p>
+          <p>Powered by OpenRouter</p>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
