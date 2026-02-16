@@ -1,16 +1,25 @@
 "use client";
 
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import { LearningPathChat } from "@/components/agent-learning-path-chat";
-import { Brain } from "lucide-react";
 
 export default function ChatPage() {
+  const { resolvedTheme } = useTheme();
+
   return (
     <div className="h-full overflow-y-auto bg-background p-4 md:p-8">
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10">
-            <Brain className="h-8 w-8 text-primary" />
+          <div className="mb-4 inline-flex items-center justify-center">
+            <Image
+              src={resolvedTheme === "dark" ? "/images/skye-logo-purple.png" : "/images/skye-logo.png"}
+              alt="SKYE"
+              width={64}
+              height={64}
+              className="w-16 h-auto"
+            />
           </div>
           <h1 className="text-4xl font-bold tracking-tight mb-2">
             Learning Path Advisor

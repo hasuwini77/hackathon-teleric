@@ -1,12 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brain, UserCircle, MessageSquare, GraduationCap, Bookmark } from "lucide-react";
+import { useTheme } from "next-themes";
+import { UserCircle, MessageSquare, GraduationCap, Bookmark } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { resolvedTheme } = useTheme();
 
   return (
     <nav
@@ -14,12 +17,15 @@ export function SidebarNav() {
       style={{ borderColor: "var(--color-border)" }}
     >
       {/* Logo */}
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-        style={{ backgroundColor: "rgba(var(--primary-rgb), 0.1)" }}
-      >
-        <Brain className="h-5 w-5" style={{ color: "var(--color-primary)" }} />
-      </div>
+      <Link href="/" className="mb-4 hover:scale-110 transition-transform">
+        <Image
+          src={resolvedTheme === "dark" ? "/images/skye-logo-purple.png" : "/images/skye-logo.png"}
+          alt="SKYE"
+          width={40}
+          height={40}
+          className="w-10 h-auto"
+        />
+      </Link>
 
       {/* Nav items */}
       <NavIcon icon={<MessageSquare className="w-5 h-5" />} label="Chat" href="/" active={pathname === "/"} />
