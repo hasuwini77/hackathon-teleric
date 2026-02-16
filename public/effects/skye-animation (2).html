@@ -1,0 +1,399 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKYE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #ffffff;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    cursor: crosshair;
+  }
+
+  canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .scanlines {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 151, 178, 0.015) 2px,
+      rgba(0, 151, 178, 0.015) 4px
+    );
+  }
+
+  .vignette {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(178, 224, 232, 0.25) 100%);
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const COLORS = {
+  main:  { r: 0x00, g: 0x97, b: 0xB2 },
+  mid:   { r: 0x59, g: 0xBB, b: 0xCD },
+  light: { r: 0xB2, g: 0xE0, b: 0xE8 },
+};
+
+let W, H, dpr;
+let mouse = { x: -9999, y: -9999 };
+let logoPixels = [];
+let particles = [];
+let ambientPixels = [];
+let time = 0;
+let assembled = false;
+let assembleStart = 0;
+const ASSEMBLE_DURATION = 2.5;
+let PIXEL_SIZE = 3;
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  extractLogoPixels();
+  initAmbientPixels();
+}
+
+function extractLogoPixels() {
+  logoPixels = [];
+
+  // Scale font to viewport, capped
+  const fontSize = Math.min(W * 0.12, 120);
+
+  // Exact ratios from the approved PNG rendered at fontSize=200:
+  // Cropped visual widths: S=175, K=175, Y=150, E=175
+  // Gaps between visual content: S-K=18, K-Y=12, Y-E=18
+  // Visual start positions: S=0, K=193, Y=380, E=548, visual_end=723
+  // BUT: Y glyph has 25px internal left offset in Press Start 2P
+  // So browser fillText positions must compensate: Y at 380-25=355
+  const scale = fontSize / 200;
+  const shadowStep = Math.max(PIXEL_SIZE, Math.round(5 * scale));
+
+  // Browser fillText positions (compensated for glyph internal offsets)
+  const letterPositions = [0, 193, 355, 548].map(p => Math.round(p * scale));
+  const contentWidth = Math.round(723 * scale);
+  const totalWidth = contentWidth + shadowStep * 2;
+
+  const letters = ['S', 'K', 'Y', 'E'];
+
+  // Offscreen canvas for rendering
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width = W;
+  offCanvas.height = H;
+  const offCtx = offCanvas.getContext('2d');
+  offCtx.font = `${fontSize}px "Press Start 2P", monospace`;
+  offCtx.textBaseline = 'top';
+
+  // Height measurement
+  const testMetrics = offCtx.measureText('S');
+  const textHeight = (testMetrics.fontBoundingBoxAscent !== undefined)
+    ? testMetrics.fontBoundingBoxAscent + testMetrics.fontBoundingBoxDescent
+    : fontSize;
+  const totalHeight = textHeight + shadowStep * 2;
+
+  // Center on screen
+  const startX = Math.round((W - totalWidth) / 2);
+  const startY = Math.round((H - totalHeight) / 2);
+
+  // 3 shadow layers: light (back), mid, main (front)
+  const layerDefs = [
+    { ox: shadowStep * 2, oy: shadowStep * 2, color: COLORS.light, idx: 2 },
+    { ox: shadowStep,     oy: shadowStep,     color: COLORS.mid,   idx: 1 },
+    { ox: 0,              oy: 0,              color: COLORS.main,  idx: 0 },
+  ];
+
+  // Create a separate canvas for each layer
+  const layerCanvases = layerDefs.map(layer => {
+    const lc = document.createElement('canvas');
+    lc.width = W;
+    lc.height = H;
+    const lctx = lc.getContext('2d');
+    lctx.font = `${fontSize}px "Press Start 2P", monospace`;
+    lctx.textBaseline = 'top';
+    lctx.fillStyle = `rgb(${layer.color.r},${layer.color.g},${layer.color.b})`;
+    for (let i = 0; i < letters.length; i++) {
+      lctx.fillText(letters[i], startX + layer.ox + letterPositions[i], startY + layer.oy);
+    }
+    return { canvas: lc, color: layer.color, idx: layer.idx };
+  });
+
+  // Sample pixels: check each position across all 3 layers, front wins
+  // layerCanvases order: [light(back), mid, main(front)]
+  // Check front first (index 2 = main), then mid (1), then back (0)
+  
+  // Pre-extract image data for performance
+  const layerData = layerCanvases.map(lc => {
+    return lc.canvas.getContext('2d').getImageData(0, 0, W, H).data;
+  });
+
+  for (let y = 0; y < H; y += PIXEL_SIZE) {
+    for (let x = 0; x < W; x += PIXEL_SIZE) {
+      const pixIdx = (y * W + x) * 4;
+      
+      // Check front (main) first, then mid, then back (light)
+      // layerData[2] = main, layerData[1] = mid, layerData[0] = light
+      for (let li = 2; li >= 0; li--) {
+        if (layerData[li][pixIdx + 3] > 128) {
+          const lc = layerCanvases[li];
+          logoPixels.push({
+            targetX: x,
+            targetY: y,
+            colorIdx: lc.idx,
+            r: lc.color.r,
+            g: lc.color.g,
+            b: lc.color.b,
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  initParticles();
+}
+
+function initParticles() {
+  particles = logoPixels.map(p => {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.random() * Math.max(W, H) * 0.8 + 200;
+    return {
+      x: p.targetX + Math.cos(angle) * dist,
+      y: p.targetY + Math.sin(angle) * dist,
+      targetX: p.targetX,
+      targetY: p.targetY,
+      colorIdx: p.colorIdx,
+      r: p.r, g: p.g, b: p.b,
+      vx: 0, vy: 0,
+      delay: Math.random() * 1.5,
+      size: PIXEL_SIZE,
+      settled: false,
+    };
+  });
+  assembleStart = performance.now() / 1000;
+  assembled = false;
+}
+
+function initAmbientPixels() {
+  ambientPixels = [];
+  const count = Math.floor((W * H) / 8000);
+  for (let i = 0; i < count; i++) {
+    ambientPixels.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: Math.random() * 3 + 2,
+      colorIdx: Math.floor(Math.random() * 3),
+      speedY: -(Math.random() * 0.4 + 0.1),
+      speedX: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.6 + 0.2,
+      alphaTarget: Math.random() * 0.6 + 0.2,
+      flickerSpeed: Math.random() * 0.02 + 0.005,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function easeOutExpo(t) {
+  return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+}
+
+function update(dt) {
+  const now = performance.now() / 1000;
+  const elapsed = now - assembleStart;
+
+  for (const p of particles) {
+    if (elapsed < p.delay + ASSEMBLE_DURATION) {
+      if (elapsed > p.delay) {
+        const t = Math.min(1, (elapsed - p.delay) / ASSEMBLE_DURATION);
+        const ease = easeOutExpo(t);
+        p.x += (p.targetX - p.x) * ease * 0.08;
+        p.y += (p.targetY - p.y) * ease * 0.08;
+      }
+    } else {
+      if (!p.settled) {
+        p.x = p.targetX;
+        p.y = p.targetY;
+        p.settled = true;
+      }
+
+      const dx = p.x - mouse.x;
+      const dy = p.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const repelRadius = 80;
+
+      if (dist < repelRadius && dist > 0) {
+        const force = (repelRadius - dist) / repelRadius * 8;
+        p.vx += (dx / dist) * force;
+        p.vy += (dy / dist) * force;
+      }
+
+      p.vx += (p.targetX - p.x) * 0.15;
+      p.vy += (p.targetY - p.y) * 0.15;
+      p.vx *= 0.75;
+      p.vy *= 0.75;
+      p.x += p.vx;
+      p.y += p.vy;
+    }
+  }
+
+  for (const a of ambientPixels) {
+    a.y += a.speedY;
+    a.x += a.speedX + Math.sin(time * 0.5 + a.phase) * 0.1;
+    a.alpha = a.alphaTarget + Math.sin(time * a.flickerSpeed * 60 + a.phase) * 0.15;
+
+    const dx = a.x - mouse.x;
+    const dy = a.y - mouse.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 120 && dist > 0) {
+      a.x += (dx / dist) * 1.5;
+      a.y += (dy / dist) * 1.5;
+    }
+
+    if (a.y < -10) { a.y = H + 10; a.x = Math.random() * W; }
+    if (a.x < -10) a.x = W + 10;
+    if (a.x > W + 10) a.x = -10;
+  }
+}
+
+function drawGrid() {
+  const gridSize = 40;
+  ctx.strokeStyle = 'rgba(178, 224, 232, 0.25)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < W; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+}
+
+function drawLogoGlow() {
+  if (!assembled && (performance.now() / 1000 - assembleStart) < 3) return;
+
+  const pulse = 0.6 + Math.sin(time * 1.5) * 0.15;
+  let minX = W, maxX = 0, minY = H, maxY = 0;
+  for (const p of logoPixels) {
+    if (p.targetX < minX) minX = p.targetX;
+    if (p.targetX > maxX) maxX = p.targetX;
+    if (p.targetY < minY) minY = p.targetY;
+    if (p.targetY > maxY) maxY = p.targetY;
+  }
+
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const rx = (maxX - minX) / 2 + 60;
+
+  const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, rx);
+  gradient.addColorStop(0, `rgba(178, 224, 232, ${0.15 * pulse})`);
+  gradient.addColorStop(0.5, `rgba(178, 224, 232, ${0.06 * pulse})`);
+  gradient.addColorStop(1, 'rgba(178, 224, 232, 0)');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  drawGrid();
+  drawLogoGlow();
+
+  const ambientColors = [
+    [0, 151, 178],
+    [89, 187, 205],
+    [178, 224, 232],
+  ];
+  for (const a of ambientPixels) {
+    const alpha = Math.max(0, Math.min(1, a.alpha));
+    const c = ambientColors[a.colorIdx];
+    ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${alpha})`;
+    ctx.fillRect(
+      Math.round(a.x / 2) * 2,
+      Math.round(a.y / 2) * 2,
+      a.size, a.size
+    );
+  }
+
+  for (const p of particles) {
+    ctx.fillStyle = `rgb(${p.r},${p.g},${p.b})`;
+    ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+  }
+}
+
+let lastTime = performance.now();
+function loop(now) {
+  const dt = (now - lastTime) / 1000;
+  lastTime = now;
+  time += dt;
+
+  if (!assembled && (performance.now() / 1000 - assembleStart) > ASSEMBLE_DURATION + 2) {
+    assembled = true;
+  }
+
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+window.addEventListener('click', () => {
+  for (const p of particles) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = Math.random() * 300 + 100;
+    p.x = p.targetX + Math.cos(angle) * dist;
+    p.y = p.targetY + Math.sin(angle) * dist;
+    p.vx = 0; p.vy = 0;
+    p.settled = false;
+    p.delay = Math.random() * 0.8;
+  }
+  assembleStart = performance.now() / 1000;
+  assembled = false;
+});
+
+document.fonts.ready.then(() => {
+  resize();
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>

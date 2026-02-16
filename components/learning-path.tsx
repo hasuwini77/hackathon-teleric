@@ -8,8 +8,7 @@ import {
   CheckCircle2, 
   Circle,
   ArrowRight,
-  ExternalLink,
-  Download
+  ExternalLink
 } from "lucide-react";
 import { Progress } from "./ui/progress";
 
@@ -171,12 +170,6 @@ export default function LearningPath() {
         ))}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-border">
-        <button className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-muted hover:bg-muted/80 text-sm font-semibold transition-all group">
-          <Download className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-          Export Path (PDF)
-        </button>
-      </div>
     </div>
   );
 }
