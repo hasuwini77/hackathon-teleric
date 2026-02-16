@@ -7,19 +7,16 @@ const courses = [
     title: "React Fundamentals",
     duration: "8 hours",
     level: "Beginner",
-    color: "#8b5cf6",
   },
   {
     title: "TypeScript Deep Dive",
     duration: "12 hours",
     level: "Intermediate",
-    color: "#6366f1",
   },
   {
     title: "Next.js 15 Mastery",
     duration: "10 hours",
     level: "Advanced",
-    color: "#7c3aed",
   },
 ];
 
@@ -43,9 +40,9 @@ export default function SuggestedCourses() {
             <div className="flex items-start gap-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                style={{ backgroundColor: `${course.color}15` }}
+                style={{ backgroundColor: "rgba(var(--primary-rgb), 0.1)" }}
               >
-                <BookOpen className="w-5 h-5" style={{ color: course.color }} />
+                <BookOpen className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-sm mb-2 tracking-tight" style={{ color: "var(--color-foreground)", lineHeight: "1.3" }}>

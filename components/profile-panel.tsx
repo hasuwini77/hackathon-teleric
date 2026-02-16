@@ -173,7 +173,7 @@ export default function ProfilePanel({
                 }`}
                 style={{
                   borderColor: isDragging ? "var(--color-primary)" : "var(--color-border)",
-                  backgroundColor: isDragging ? "rgba(139, 92, 246, 0.05)" : "var(--color-card)",
+                  backgroundColor: isDragging ? "rgba(var(--primary-rgb), 0.05)" : "var(--color-card)",
                 }}
               >
                 <input
@@ -289,8 +289,8 @@ export default function ProfilePanel({
                       onClick={() => removeSkill(skill)}
                       className="px-3 py-1.5 text-xs rounded-lg flex items-center gap-2 border transition-all hover:scale-105 cursor-pointer hover:bg-red-500/10 hover:border-red-500/20 group/skill"
                       style={{
-                        backgroundColor: recognized ? "rgba(139, 92, 246, 0.08)" : "rgba(100, 100, 100, 0.08)",
-                        borderColor: recognized ? "rgba(139, 92, 246, 0.2)" : "rgba(100, 100, 100, 0.2)",
+                        backgroundColor: recognized ? "rgba(var(--primary-rgb), 0.08)" : "rgba(100, 100, 100, 0.08)",
+                        borderColor: recognized ? "rgba(var(--primary-rgb), 0.2)" : "rgba(100, 100, 100, 0.2)",
                         color: "var(--color-foreground)",
                       }}
                     >
@@ -321,8 +321,8 @@ export default function ProfilePanel({
                       }}
                       className="px-3 py-1.5 text-xs rounded-lg border transition-all hover:scale-105 cursor-pointer"
                       style={{
-                        backgroundColor: "rgba(139, 92, 246, 0.05)",
-                        borderColor: "rgba(139, 92, 246, 0.15)",
+                        backgroundColor: "rgba(var(--primary-rgb), 0.05)",
+                        borderColor: "rgba(var(--primary-rgb), 0.15)",
                         color: "var(--color-foreground)",
                       }}
                     >
@@ -346,7 +346,7 @@ export default function ProfilePanel({
             style={{
               background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)",
               color: "var(--color-primary-foreground)",
-              boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)",
+              boxShadow: "0 4px 12px rgba(var(--primary-rgb), 0.3)",
             }}
           >
             {isDigesting ? (

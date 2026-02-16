@@ -7,6 +7,7 @@ import ProfilePanel, { type UserProfile } from "@/components/profile-panel";
 import LearningPath from "@/components/learning-path";
 import { Brain } from "lucide-react";
 import { useSpeech } from "@/hooks/use-speech";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const AgentAvatar = dynamic(() => import("@/components/agent-avatar"), {
   ssr: false,
@@ -32,13 +33,11 @@ export default function Page() {
 
   const handleDigest = () => {
     setIsDigesting(true);
-    // Simulate processing time
     speak("Analysing your profile and experience. Generating personalized recommendations.");
     setTimeout(() => {
         setIsDigesting(false);
     }, 4000);
   };
-
 
   return (
     <main className="h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-background)' }}>
@@ -46,7 +45,7 @@ export default function Page() {
         {/* Top bar */}
         <header className="flex items-center justify-between px-6 py-5 border-b shrink-0" style={{ borderColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)' }}>
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl" style={{ backgroundColor: 'rgba(var(--primary-rgb), 0.1)' }}>
               <Brain className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
             </div>
             <div>
@@ -58,15 +57,18 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <span className="flex items-center gap-2 px-3 py-1.5 text-xs rounded-full border" 
-                style={{ 
-                  backgroundColor: 'rgba(139, 92, 246, 0.08)', 
-                  color: 'var(--color-primary)',
-                  borderColor: 'rgba(139, 92, 246, 0.2)'
-                }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--color-primary)' }} />
-            Online
-          </span>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <span className="flex items-center gap-2 px-3 py-1.5 text-xs rounded-full border"
+                  style={{
+                    backgroundColor: 'rgba(var(--primary-rgb), 0.08)',
+                    color: 'var(--color-primary)',
+                    borderColor: 'rgba(var(--primary-rgb), 0.2)'
+                  }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--color-primary)' }} />
+              Online
+            </span>
+          </div>
         </header>
 
         {/* Main content */}
@@ -94,7 +96,7 @@ export default function Page() {
               {isSpeaking && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
                   <div className="flex items-center gap-1.5 px-4 py-2 rounded-full border"
-                       style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+                       style={{ backgroundColor: 'rgba(var(--primary-rgb), 0.1)', borderColor: 'rgba(var(--primary-rgb), 0.2)' }}>
                     <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <span
@@ -121,7 +123,7 @@ export default function Page() {
             <div className="px-6 py-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full flex items-center justify-center border"
-                     style={{ backgroundColor: 'rgba(139, 92, 246, 0.08)', borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+                     style={{ backgroundColor: 'rgba(var(--primary-rgb), 0.08)', borderColor: 'rgba(var(--primary-rgb), 0.2)' }}>
                   <Brain className="h-5 w-5" style={{ color: 'var(--color-primary)' }} />
                 </div>
                 <div>
