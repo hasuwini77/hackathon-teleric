@@ -86,6 +86,11 @@ Internal Certifications: ${internalData.certs.join(", ")}
       memory.background = null;
       memory.skill_level = null;
       memory.relevant_experience = null;
+
+      // Persist the updated agent state so enterprise context is not lost on refresh.
+      if (typeof (agent as any).saveState === "function") {
+        (agent as any).saveState();
+      }
     }
   }
 

@@ -17,7 +17,7 @@ import {
   Briefcase, 
   ChevronDown,
   Sparkles,
-  ShieldCheck,
+
   Code,
   Palette,
   Database,
