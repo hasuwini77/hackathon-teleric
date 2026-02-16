@@ -9,7 +9,7 @@ Our tool shouldn't require anyone to manually upload files. Instead, **SKYE** ac
 - **Learning Platforms**: To connect with training your company already pays for.
 
 ## 🌉 How it Works: The "Signal Bridge"
-We want the tool to "listen" to different signals from your company. We currently have a demo of this in [enterprise-service.ts](file:///Yourfiles/hackathon-1/lib/enterprise-service.ts). 
+We want the tool to "listen" to different signals from your company. We currently have a demo of this in [enterprise-service.ts](../lib/enterprise-service.ts). 
 
 ### Future API Hook Points:
 1. **User Identity Signal**: Fetches role, current skills, and manager-defined objectives.
