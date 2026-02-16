@@ -152,13 +152,13 @@ export default function ChatPanel({ profile, onProfileChange, speak }: ChatPanel
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading || isDisassembling}
-                    className="absolute right-3 bottom-3 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
+                    className="absolute right-3 bottom-5 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-30 disabled:hover:scale-100"
                     style={{
                       backgroundColor: "var(--color-primary)",
                       color: "var(--color-primary-foreground)",
                     }}
                   >
-                    <ArrowUp className="w-5 h-5" />
+                    <ArrowUp className="w-3 h-3" />
                   </button>
                 </div>
               </form>
