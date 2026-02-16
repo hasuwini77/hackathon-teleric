@@ -158,3 +158,17 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--primary-rgb), 0.4);
 }
+
+/* Pixel bounce: jump up, small bounce, settle, then next */
+@keyframes pixel-hop {
+  0%   { transform: translateY(0); }
+  4%   { transform: translateY(-4px); }
+  8%   { transform: translateY(0); }
+  11%  { transform: translateY(-1.5px); }
+  14%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+.pixel-bounce-1 { animation: pixel-hop 1.5s ease-out infinite; }
+.pixel-bounce-2 { animation: pixel-hop 1.5s ease-out 0.45s infinite; }
+.pixel-bounce-3 { animation: pixel-hop 1.5s ease-out 0.9s infinite; }

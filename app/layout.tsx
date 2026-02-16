@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk, Press_Start_2P } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarNav } from "@/components/sidebar-nav";
 
@@ -10,6 +10,11 @@ const _inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const _spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
+});
+const _pressStart2P = Press_Start_2P({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-pixel",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body
-        className={`${_inter.variable} ${_spaceGrotesk.variable} min-h-screen font-sans antialiased`}
+        className={`${_inter.variable} ${_spaceGrotesk.variable} ${_pressStart2P.variable} min-h-screen font-sans antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <div className="flex h-screen overflow-hidden">
