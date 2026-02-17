@@ -24,7 +24,7 @@ export default function Page() {
 
   const handleStartLearning = () => {
     const newId = SessionStore.generateSessionId();
-    router.push(`/teach?session=${newId}`);
+    router.push(`/chat?session=${newId}`);
   };
 
   const handleResumeSession = (id: string) => {
