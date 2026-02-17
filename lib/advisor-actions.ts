@@ -3,7 +3,7 @@
  * Defines action types and handles action scheduling/execution
  */
 
-import { AgentMemory, ChatMessage } from "./agent-state";
+import { AgentMemory, ChatMessage } from "./advisor-state";
 
 export interface ActionData {
   type: string;

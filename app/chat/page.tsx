@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { LearningPathChat } from "@/components/agent-learning-path-chat";
 import { Brain } from "lucide-react";
 
@@ -17,17 +18,25 @@ export default function ChatPage() {
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Your AI-powered guide to building personalized learning roadmaps.
-            Tell me about your goals and I'll help you create an actionable
+            Tell me about your goals and I&apos;ll help you create an actionable
             learning plan.
           </p>
         </div>
 
         {/* Chat Component */}
-        <LearningPathChat />
+        <Suspense
+          fallback={
+            <div className="text-center text-muted-foreground py-12">
+              Loading session...
+            </div>
+          }
+        >
+          <LearningPathChat />
+        </Suspense>
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Powered by OpenRouter • Persistent conversations with Neon DB</p>
+          <p>Powered by OpenRouter</p>
         </div>
       </div>
     </main>

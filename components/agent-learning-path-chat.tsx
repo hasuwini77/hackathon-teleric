@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -11,7 +12,8 @@ import {
   LearningPathAgent,
   type ChatMessage,
   type ActionData,
-} from "@/lib/chat-agent";
+} from "@/lib/advisor-agent";
+import { SessionStore } from "@/lib/session-store";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +21,7 @@ interface Message {
 }
 
 export function LearningPathChat() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,40 +30,52 @@ export function LearningPathChat() {
   const [, forceUpdate] = useState({}); // Force re-render when memory updates
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Initialize agent on mount
+  // Initialize agent on mount — restore session from URL, fallback to most recent
   useEffect(() => {
-    const initAgent = async () => {
-      const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setSessionId(newSessionId);
+    let targetSessionId = searchParams.get("session");
 
-      try {
-        // API key is now handled server-side, just pass empty string
-        const newAgent = new LearningPathAgent(newSessionId);
-        setAgent(newAgent);
-
-        // Get initial messages from agent
-        const agentMessages = newAgent.getMessages();
-        setMessages(
-          agentMessages
-            .filter((m) => m.role !== "system")
-            .map((m) => ({
-              role: m.role as "user" | "assistant",
-              content: m.content,
-            })),
-        );
-      } catch (error) {
-        console.error("Failed to initialize agent:", error);
-        setMessages([
-          {
-            role: "assistant",
-            content:
-              "Hi! I'm here to help you create a personalized learning path. To get started, could you tell me a bit about yourself and what you're looking to learn?",
-          },
-        ]);
+    if (!targetSessionId) {
+      const recent = SessionStore.getMostRecentSession();
+      if (recent) {
+        targetSessionId = recent.sessionId;
       }
-    };
+    }
 
-    initAgent();
+    if (!targetSessionId) {
+      targetSessionId = SessionStore.generateSessionId();
+    }
+
+    setSessionId(targetSessionId);
+
+    // Update URL so refresh preserves the session
+    const url = new URL(window.location.href);
+    url.searchParams.set("session", targetSessionId);
+    window.history.replaceState({}, "", url.toString());
+
+    try {
+      const newAgent = new LearningPathAgent(targetSessionId);
+      setAgent(newAgent);
+
+      const agentMessages = newAgent.getMessages();
+      setMessages(
+        agentMessages
+          .filter((m) => m.role !== "system")
+          .map((m) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          })),
+      );
+    } catch (error) {
+      console.error("Failed to initialize agent:", error);
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            "Hi! I'm here to help you create a personalized learning path. To get started, could you tell me a bit about yourself and what you're looking to learn?",
+        },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-scroll to bottom when new messages arrive

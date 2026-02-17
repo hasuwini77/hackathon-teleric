@@ -4,8 +4,8 @@
  * Flow logic and orchestration
  */
 
-import { AgentMemory, ChatMessage, AgentState } from "./agent-state";
-import { ActionData, ActionType, AgentActions } from "./agent-actions";
+import { AgentMemory, ChatMessage, AgentState } from "./advisor-state";
+import { ActionData, ActionType, AgentActions } from "./advisor-actions";
 
 // Re-export types for backward compatibility
 export type { AgentMemory, ChatMessage, ActionData };
