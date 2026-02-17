@@ -15,11 +15,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build-time env vars (defaults are empty; override at build or runtime)
-ARG OPENROUTER_API_KEY=""
 ARG OPENAI_MODEL="openai/gpt-4o-mini"
 ARG NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 
-ENV OPENROUTER_API_KEY=$OPENROUTER_API_KEY
 ENV OPENAI_MODEL=$OPENAI_MODEL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
