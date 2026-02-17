@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { LearningPathChat } from "@/components/agent-learning-path-chat";
 import { Brain } from "lucide-react";
+import { PromptConfigPanel } from "@/components/prompt-config-panel";
 
 export default function ChatPage() {
   return (
@@ -39,6 +40,9 @@ export default function ChatPage() {
           <p>Powered by OpenRouter</p>
         </div>
       </div>
+
+      {/* Dev Prompt Config Panel */}
+      <PromptConfigPanel />
     </main>
   );
 }

@@ -6,6 +6,7 @@
 
 import { AgentMemory, ChatMessage, AgentState } from "./advisor-state";
 import { ActionData, ActionType, AgentActions } from "./advisor-actions";
+import { PromptConfigStore } from "./prompt-config";
 
 // Re-export types for backward compatibility
 export type { AgentMemory, ChatMessage, ActionData };
@@ -109,21 +110,8 @@ export class LearningPathAgent {
   }
 
   private getSystemPrompt(): string {
-    const base = `You are an expert AI learning advisor that helps users build personalized learning paths.
-
-Your conversation goal:
-1. Understand what they want to achieve (objective)
-2. Assess their current knowledge and experience
-3. Understand constraints (time, budget, learning style)
-4. Create a practical, actionable learning path
-
-Guidelines:
-- Be conversational and natural - don't follow a rigid script
-- Ask follow-up questions when you need clarity for what they are missing to achieve their goal
-- If they provide rich information upfront, don't ask redundant questions
-- Move to creating the learning path when you have enough context
-- The learning path should have 3-6 milestones with specific projects and resources
-- Keep the questions to a minimum and only ask for missing information that is essential to creating the minimum learning path`;
+    const config = PromptConfigStore.getConfig();
+    const base = config.advisorSystemPrompt;
 
     const contextParts = [
       ...this.buildContextParts(),
@@ -319,7 +307,7 @@ Set learning_path_detected to true if the assistant's response contains a struct
     const message = await this.callOpenRouter({
       messages: this.state.getMessages(),
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 100,
     });
     const assistantText = message.content.trim();
 
