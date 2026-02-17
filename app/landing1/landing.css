@@ -14,7 +14,6 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   margin: 0;
-  overflow: hidden; /* Prevent scrolling for the immersive hero */
 }
 
 .hero-text-glow {
@@ -80,4 +79,13 @@ body {
 
 .animate-fade-up {
   animation: fade-up 1.5s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
 }
