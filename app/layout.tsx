@@ -29,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body
         className={`${_inter.variable} ${_spaceGrotesk.variable} min-h-screen font-sans antialiased`}
+        suppressHydrationWarning
       >
         {children}
       </body>

@@ -197,8 +197,8 @@ export class TeacherAgent {
       content: this.getSystemPrompt(),
     });
 
-    if (this.memory.learningPath) {
-      const firstMilestone = this.memory.learningPath.milestones[0];
+    const firstMilestone = this.memory.learningPath?.milestones?.[0];
+    if (this.memory.learningPath && firstMilestone) {
       this.messages.push({
         role: "assistant",
         content: `Welcome! I'm your teacher for "${this.memory.learningPath.title}". We'll work through ${this.memory.learningPath.milestones.length} milestones together. Ready to start with "${firstMilestone.title}"?`,

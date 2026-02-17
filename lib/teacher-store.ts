@@ -37,6 +37,52 @@ export class TeacherStore {
     return sessions.find((s) => s.sessionId === sessionId) || null;
   }
 
+  static getOrCreateSession(sessionId: string): TeacherSession {
+    const existing = this.getSession(sessionId);
+    if (existing) return existing;
+
+    const now = new Date().toISOString();
+    const emptyPath: LearningPath = {
+      id: sessionId,
+      title: "New Learning Session",
+      description: "",
+      objective: "",
+      difficulty: "beginner",
+      totalDuration: "",
+      prerequisites: [],
+      milestones: [],
+      createdBy: "advisor",
+      createdAt: now,
+    };
+
+    const memory: TeacherMemory = {
+      learningPath: emptyPath,
+      currentMilestoneIndex: 0,
+      currentCourseIndex: 0,
+      completedCourses: [],
+      completedMilestones: [],
+      userFeedback: {
+        isBoring: false,
+        difficultyLevel: null,
+        preferredStyle: null,
+      },
+      sessionStarted: new Date(),
+    };
+
+    const session: TeacherSession = {
+      sessionId,
+      learningPath: emptyPath,
+      createdAt: now,
+      updatedAt: now,
+      memory,
+    };
+
+    const sessions = this.getAllSessions();
+    sessions.push(session);
+    localStorage.setItem(TEACHER_SESSIONS_KEY, JSON.stringify(sessions));
+    return session;
+  }
+
   static createSession(learningPath: LearningPath): string {
     const sessionId = `teacher_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const now = new Date().toISOString();

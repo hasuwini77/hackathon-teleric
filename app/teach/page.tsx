@@ -31,13 +31,7 @@ function TeachPageContent() {
       return;
     }
 
-    const session = TeacherStore.getSession(sessionId);
-
-    if (!session) {
-      router.push("/");
-      return;
-    }
-
+    const session = TeacherStore.getOrCreateSession(sessionId);
     setTeacherSession(session);
 
     // Initialize profile from learning path data
