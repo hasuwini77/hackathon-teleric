@@ -3,6 +3,8 @@
  * Handles memory persistence and state-related operations
  */
 
+import { SessionStore } from "./session-store";
+
 export interface AgentMemory {
   objective: string | null;
   relevant_experience: string | null;
@@ -84,6 +86,7 @@ export class AgentState {
         this.getStorageKey("messages"),
         JSON.stringify(this.chatMessages),
       );
+      SessionStore.upsertSession(this.sessionId, this.memory);
     } catch (error) {
       console.error("Failed to save to localStorage:", error);
     }
@@ -116,5 +119,6 @@ export class AgentState {
   static clearSession(sessionId: string): void {
     localStorage.removeItem(`learning_agent_${sessionId}_memory`);
     localStorage.removeItem(`learning_agent_${sessionId}_messages`);
+    SessionStore.removeSession(sessionId);
   }
 }
