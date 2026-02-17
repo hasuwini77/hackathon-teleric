@@ -4,6 +4,7 @@
  */
 
 import { LearningPath, Milestone, Course } from "./learning-path-types";
+import { PromptConfigStore } from "./prompt-config";
 
 export interface TeacherMemory {
   learningPath: LearningPath | null;
@@ -212,38 +213,15 @@ export class TeacherAgent {
   }
 
   private getSystemPrompt(): string {
+    const config = PromptConfigStore.getConfig();
     const context = this.getCurrentContext();
 
-    return `You are an expert teacher who guides students through a learning path.
+    return `${config.teacherSystemPrompt}
 
-Your job: Present lessons and test understanding.
-
-Response Types:
-1. "text" - For casual communication, answering questions, or encouragement
-   - Just provide helpful content to guide the student
-
-2. "lesson" - For teaching new concepts (always include ALL fields)
-   - title: The lesson name
-   - content: Detailed explanation of the concept
-   - examples: Array of 2-3 practical code/real-world examples
-   - keyTakeaways: Array of 3-5 important points to remember
-   - question: A single multiple-choice question to test understanding
-     * id: unique identifier
-     * question: the test question
-     * options: array of 4 answer choices
-     * correctAnswer: the correct option text
-     * explanation: why this answer is correct
+${config.lessonGenerationGuidelines}
 
 Current Context:
 ${context}
-
-Teaching Guidelines:
-- Start with a lesson when user is ready to learn
-- Each lesson MUST include a quiz question to test understanding
-- Use real-world examples
-- Keep explanations clear and concise
-- Adapt based on feedback (boring → more examples, too hard → simpler explanations)
-- Always be encouraging
 
 Return responses as JSON matching the schema.`;
   }

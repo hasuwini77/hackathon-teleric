@@ -8,6 +8,7 @@ import ChatPanel from "@/components/chat-panel";
 import { TeacherStore, type TeacherSession } from "@/lib/teacher-store";
 import type { UserProfile } from "@/components/profile-panel";
 import { useSpeech } from "@/hooks/use-speech";
+import { PromptConfigPanel } from "@/components/prompt-config-panel";
 
 function TeachPageContent() {
   const searchParams = useSearchParams();
@@ -105,6 +106,9 @@ function TeachPageContent() {
           />
         </div>
       </div>
+
+      {/* Dev Prompt Config Panel */}
+      <PromptConfigPanel />
     </main>
   );
 }
