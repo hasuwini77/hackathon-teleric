@@ -11,7 +11,7 @@ import {
   LearningPathAgent,
   type ChatMessage,
   type ActionData,
-} from "@/lib/chat-agent";
+} from "@/lib/advisor-agent";
 
 interface Message {
   role: "user" | "assistant";
