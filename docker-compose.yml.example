@@ -1,13 +1,22 @@
 services:
   mentorai:
-    build: .
+    image: ghcr.io/hasuwini77/hackathon-teleric:latest
     ports:
       - "3000:3000"
     environment:
       # Required – your OpenRouter API key
-      OPENROUTER_API_KEY: "sk-or-v1-REPLACE_ME"
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY}"
       # Optional – model to use (default: openai/gpt-4o-mini)
       OPENAI_MODEL: "openai/gpt-4o-mini"
       # Optional – public URL shown in OpenRouter referrer header
       NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+    restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 60
+      WATCHTOWER_CLEANUP: "true"
     restart: unless-stopped
