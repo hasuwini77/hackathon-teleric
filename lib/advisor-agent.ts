@@ -307,7 +307,7 @@ Set learning_path_detected to true if the assistant's response contains a struct
     const message = await this.callOpenRouter({
       messages: this.state.getMessages(),
       temperature: 0.7,
-      max_tokens: 100,
+      max_tokens: 800,
     });
     const assistantText = message.content.trim();
 
