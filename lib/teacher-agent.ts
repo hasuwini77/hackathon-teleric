@@ -132,7 +132,7 @@ export class TeacherAgent {
     this.memory = this.initMemory(learningPath);
     this.messages = [];
 
-    this.loadFromLocalStorage();
+    this.loadFromLocalStorage(learningPath);
 
     if (this.messages.length === 0) {
       this.initializeConversation();
@@ -159,13 +159,18 @@ export class TeacherAgent {
     return `teacher_agent_${this.sessionId}_${suffix}`;
   }
 
-  private loadFromLocalStorage(): void {
+  private loadFromLocalStorage(constructorLearningPath?: LearningPath): void {
     try {
       const memoryJson = localStorage.getItem(this.getStorageKey("memory"));
       const messagesJson = localStorage.getItem(this.getStorageKey("messages"));
 
       if (memoryJson) {
         this.memory = JSON.parse(memoryJson);
+        // If the stored memory has no/blank learning path but we have one from the
+        // constructor (loaded fresh from TeacherStore), use the fresh one
+        if (!this.memory.learningPath?.objective && constructorLearningPath?.objective) {
+          this.memory.learningPath = constructorLearningPath;
+        }
       }
 
       if (messagesJson) {
@@ -203,6 +208,11 @@ export class TeacherAgent {
         role: "assistant",
         content: `Welcome! I'm your teacher for "${this.memory.learningPath.title}". We'll work through ${this.memory.learningPath.milestones.length} milestones together. Ready to start with "${firstMilestone.title}"?`,
       });
+    } else if (this.memory.learningPath?.objective) {
+      this.messages.push({
+        role: "assistant",
+        content: `Welcome! I'm your personal teacher and I already have your learning plan ready. Your goal is: "${this.memory.learningPath.objective}". Let's dive right in — I'll teach you step by step!`,
+      });
     } else {
       this.messages.push({
         role: "assistant",
@@ -236,11 +246,21 @@ Return responses as JSON matching the schema.`;
     const course = milestone?.courses[this.memory.currentCourseIndex];
 
     const parts = [
-      `Learning Path: ${path.title}`,
-      `Current Milestone: ${milestone?.title} (${this.memory.currentMilestoneIndex + 1}/${path.milestones.length})`,
-      `Current Course: ${course?.title || "None"}`,
-      `Completed: ${this.memory.completedCourses.length} courses, ${this.memory.completedMilestones.length} milestones`,
+      `Learning Objective: ${path.objective || path.title}`,
+      `Difficulty: ${path.difficulty}`,
     ];
+
+    if (path.description) {
+      parts.push(`Learning Path Content:\n${path.description}`);
+    }
+
+    if (path.milestones.length > 0) {
+      parts.push(
+        `Current Milestone: ${milestone?.title} (${this.memory.currentMilestoneIndex + 1}/${path.milestones.length})`,
+        `Current Course: ${course?.title || "None"}`,
+        `Completed: ${this.memory.completedCourses.length} courses, ${this.memory.completedMilestones.length} milestones`,
+      );
+    }
 
     if (this.memory.userFeedback.isBoring) {
       parts.push("⚠️ User finds content boring - add more practical examples");

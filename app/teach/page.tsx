@@ -6,6 +6,7 @@ import { Brain, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChatPanel from "@/components/chat-panel";
 import { TeacherStore, type TeacherSession } from "@/lib/teacher-store";
+import { SessionStore } from "@/lib/session-store";
 import type { UserProfile } from "@/components/profile-panel";
 import { useSpeech } from "@/hooks/use-speech";
 import { PromptConfigPanel } from "@/components/prompt-config-panel";
@@ -31,7 +32,32 @@ function TeachPageContent() {
       return;
     }
 
-    const session = TeacherStore.getOrCreateSession(sessionId);
+    // Load advisor session data to pre-populate the learning path
+    const advisorSummary = SessionStore.getSession(sessionId);
+
+    // Extract the learning path text from the advisor's conversation
+    let advisorLearningPathText: string | null = null;
+    try {
+      const raw = localStorage.getItem(`learning_agent_${sessionId}_messages`);
+      if (raw) {
+        const msgs: Array<{ role: string; content: string }> = JSON.parse(raw);
+        const keywords = ["milestone", "phase", "step", "week"];
+        const pathMsg = msgs
+          .slice()
+          .reverse()
+          .find(
+            (m) =>
+              m.role === "assistant" &&
+              m.content.length > 200 &&
+              keywords.some((kw) => m.content.toLowerCase().includes(kw)),
+          );
+        advisorLearningPathText = pathMsg?.content ?? null;
+      }
+    } catch {
+      // ignore
+    }
+
+    const session = TeacherStore.getOrCreateSession(sessionId, advisorSummary, advisorLearningPathText);
     setTeacherSession(session);
 
     // Initialize profile from learning path data
@@ -97,6 +123,7 @@ function TeachPageContent() {
             onProfileChange={handleProfileChange}
             speak={speak}
             learningPath={teacherSession.learningPath}
+            sessionId={sessionId ?? undefined}
           />
         </div>
       </div>

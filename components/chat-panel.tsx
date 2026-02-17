@@ -34,6 +34,7 @@ interface ChatPanelProps {
   onProfileChange: (profile: UserProfile) => void;
   speak: (text: string) => void;
   learningPath?: LearningPath;
+  sessionId?: string;
 }
 
 export default function ChatPanel({
@@ -41,6 +42,7 @@ export default function ChatPanel({
   onProfileChange,
   speak,
   learningPath,
+  sessionId,
 }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -57,8 +59,8 @@ export default function ChatPanel({
 
   // Initialize teacher agent
   useEffect(() => {
-    const sessionId = `teacher_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const newAgent = new TeacherAgent(sessionId, learningPath);
+    const agentSessionId = sessionId ?? `teacher_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newAgent = new TeacherAgent(agentSessionId, learningPath);
     setAgent(newAgent);
 
     // Load initial messages

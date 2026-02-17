@@ -38,6 +38,11 @@ export class SessionStore {
     return sessions.length > 0 ? sessions[0] : null;
   }
 
+  static getSession(sessionId: string): SessionSummary | null {
+    const sessions = SessionStore.getAllSessions();
+    return sessions.find((s) => s.sessionId === sessionId) || null;
+  }
+
   static upsertSession(sessionId: string, memory: AgentMemory): void {
     const sessions = SessionStore.getAllSessions();
     const now = new Date().toISOString();

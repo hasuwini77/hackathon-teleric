@@ -6,6 +6,7 @@
 
 import type { LearningPath } from "./learning-path-types";
 import type { TeacherMemory } from "./teacher-agent";
+import type { SessionSummary } from "./session-store";
 
 export interface TeacherSession {
   sessionId: string;
@@ -37,19 +38,41 @@ export class TeacherStore {
     return sessions.find((s) => s.sessionId === sessionId) || null;
   }
 
-  static getOrCreateSession(sessionId: string): TeacherSession {
+  static getOrCreateSession(
+    sessionId: string,
+    advisorSummary?: SessionSummary | null,
+    advisorLearningPathText?: string | null,
+  ): TeacherSession {
     const existing = this.getSession(sessionId);
-    if (existing) return existing;
+    if (existing) {
+      // If the stored session is a blank placeholder, enrich it with advisor data
+      if (!existing.learningPath.objective && (advisorSummary?.objective || advisorLearningPathText)) {
+        existing.learningPath.objective = advisorSummary?.objective || "";
+        existing.learningPath.title = advisorSummary?.objective || existing.learningPath.title;
+        existing.learningPath.description = advisorLearningPathText || advisorSummary?.objective || "";
+        existing.learningPath.difficulty = advisorSummary?.skillLevel || existing.learningPath.difficulty;
+        existing.learningPath.prerequisites = advisorSummary?.skills || [];
+        existing.memory.learningPath = existing.learningPath;
+        existing.updatedAt = new Date().toISOString();
+        const sessions = this.getAllSessions();
+        const idx = sessions.findIndex((s) => s.sessionId === sessionId);
+        if (idx >= 0) {
+          sessions[idx] = existing;
+          localStorage.setItem(TEACHER_SESSIONS_KEY, JSON.stringify(sessions));
+        }
+      }
+      return existing;
+    }
 
     const now = new Date().toISOString();
     const emptyPath: LearningPath = {
       id: sessionId,
-      title: "New Learning Session",
-      description: "",
-      objective: "",
-      difficulty: "beginner",
+      title: advisorSummary?.objective || "New Learning Session",
+      description: advisorLearningPathText || advisorSummary?.objective || "",
+      objective: advisorSummary?.objective || "",
+      difficulty: advisorSummary?.skillLevel || "beginner",
       totalDuration: "",
-      prerequisites: [],
+      prerequisites: advisorSummary?.skills || [],
       milestones: [],
       createdBy: "advisor",
       createdAt: now,
