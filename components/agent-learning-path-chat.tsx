@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, Send, User, Bot } from "lucide-react";
+import LearningPathDisplay from "@/components/learning-path";
+import type { LearningPath } from "@/lib/learning-path-types";
 import {
   LearningPathAgent,
   type ChatMessage,
@@ -49,6 +51,8 @@ export function LearningPathChat() {
   const [selectedRole, setSelectedRole] = useState<string>("default");
   const [, forceUpdate] = useState({}); // Force re-render when memory updates
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
+  const [isGeneratingPath, setIsGeneratingPath] = useState(false);
 
   // Initialize agent on mount — restore session from URL, fallback to most recent
   useEffect(() => {
@@ -89,6 +93,11 @@ export function LearningPathChat() {
             content: m.content,
           })),
       );
+      // If a structured learning path is already stored in memory, load it
+      const existingPath = newAgent.getMemory().learning_path;
+      if (existingPath) {
+        setLearningPath(existingPath as LearningPath);
+      }
     } catch (error) {
       console.error("Failed to initialize agent:", error);
       setMessages([
@@ -110,11 +119,41 @@ export function LearningPathChat() {
     }
   }, [messages]);
 
+  // Effect to check for path creation and generate structured data
+  useEffect(() => {
+    if (!agent) return;
+
+    const checkAndGeneratePath = async () => {
+      const memory = agent.getMemory();
+      
+      // If memory says path is created, but we don't have the object yet
+      if (memory.learning_path_created && !learningPath && !isGeneratingPath) {
+        setIsGeneratingPath(true);
+        const path = await agent.generateStructuredLearningPath();
+        if (path) {
+          setLearningPath(path);
+          // Handle any pending actions the agent scheduled (save/send)
+          const actions = agent.getPendingActions();
+          if (actions.length > 0) {
+            await handlePendingActions(actions);
+          }
+        }
+        setIsGeneratingPath(false);
+      }
+    };
+
+    // Check once when messages or agent change
+    checkAndGeneratePath();
+  }, [messages, agent, learningPath, isGeneratingPath]);
   // Handle pending actions when they're available
   const handlePendingActions = async (actions: ActionData[]) => {
     for (const action of actions) {
-      if (action.type === "send_to_backend") {
-        // Send learning path to backend for persistence
+      // Save any action that contains a learning_path to the backend
+      if (
+        action.type === "send_to_backend" ||
+        action.type === "save_learning_path" ||
+        action.data?.learning_path
+      ) {
         try {
           await fetch("/api/learning-paths", {
             method: "POST",
@@ -214,9 +253,9 @@ export function LearningPathChat() {
   };
 
   return (
-    <div className="flex gap-4 w-full max-w-6xl mx-auto">
+    <div className="flex gap-4 w-full max-w-[1400px] mx-auto h-[600px]">
       {/* Left Panel - Profile Form */}
-      <Card className="w-80 shrink-0 p-4">
+      <Card className="w-72 shrink-0 p-4 overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4">Your Profile</h3>
         <div className="space-y-4">
           <div>
@@ -319,7 +358,7 @@ export function LearningPathChat() {
       </Card>
 
       {/* Right Panel - Chat */}
-      <Card className="flex flex-col h-[600px] flex-1">
+      <Card className="flex flex-col flex-1 min-w-[400px]">
         {/* Header */}
         <div className="border-b p-4 flex justify-between items-center bg-muted/30">
           <div>
@@ -454,6 +493,23 @@ export function LearningPathChat() {
           </form>
         </div>
       </Card>
+
+      {/* Right Panel - Learning Path Card (Conditional) */}
+      {(learningPath || isGeneratingPath) && (
+        <div className="w-80 shrink-0 flex flex-col h-full animate-in slide-in-from-right-10 fade-in duration-500">
+          {isGeneratingPath ? (
+            <Card className="h-full flex items-center justify-center p-6 text-center">
+              <div className="space-y-3">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+                <p className="text-sm font-medium">Constructing your interactive path...</p>
+                <p className="text-xs text-muted-foreground">Extracting milestones and resources</p>
+              </div>
+            </Card>
+          ) : (
+            learningPath && <LearningPathDisplay path={learningPath} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

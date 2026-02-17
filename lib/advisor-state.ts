@@ -19,6 +19,8 @@ export interface AgentMemory {
   interests: string[];
   learning_path_created: boolean;
   scheduled_actions: string[];
+  // Optional structured learning path persisted with the agent
+  learning_path?: Record<string, any> | null;
 }
 
 export interface ChatMessage {
@@ -52,6 +54,7 @@ export class AgentState {
       interests: [],
       learning_path_created: false,
       scheduled_actions: [],
+      learning_path: null,
     };
   }
 

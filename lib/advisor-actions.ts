@@ -34,8 +34,8 @@ export class AgentActions {
       memory.learning_path_created &&
       !memory.scheduled_actions.includes(ActionType.SAVE_LEARNING_PATH)
     ) {
-      const learningPathContent =
-        this.extractLearningPathFromMessages(messages);
+      // Prefer structured learning_path stored in memory; fall back to message extraction
+      const learningPathContent = memory.learning_path || this.extractLearningPathFromMessages(messages);
 
       this.pendingActions.push({
         type: ActionType.SAVE_LEARNING_PATH,
