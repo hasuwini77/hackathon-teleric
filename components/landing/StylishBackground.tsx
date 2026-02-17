@@ -50,9 +50,7 @@ function WavyParticles() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={total}
-          array={positions}
-          itemSize={3}
+          args={[positions, 3]}
         />
       </bufferGeometry>
       <PointMaterial
