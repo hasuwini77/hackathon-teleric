@@ -1,4 +1,4 @@
-import { LearningPathAgent } from "./chat-agent";
+import { LearningPathAgent } from "./advisor-agent";
 
 /**
  * Enterprise Signal Chain

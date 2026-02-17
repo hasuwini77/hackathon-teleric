@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SessionStore, type SessionSummary } from "@/lib/session-store";
+import { TeacherStore, type TeacherSession } from "@/lib/teacher-store";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -20,15 +21,14 @@ function formatDate(iso: string) {
 function SessionCard({
   session,
   onResume,
+  onStartTeaching,
 }: {
   session: SessionSummary;
   onResume: (id: string) => void;
+  onStartTeaching?: (id: string) => void;
 }) {
   return (
-    <Card
-      className="flex flex-col p-5 cursor-pointer transition-colors hover:border-[var(--color-primary)]/30"
-      onClick={() => onResume(session.sessionId)}
-    >
+    <Card className="flex flex-col p-5 transition-colors hover:border-[var(--color-primary)]/30">
       <div className="flex items-center justify-between mb-3">
         <Badge
           variant={session.learningPathCreated ? "default" : "outline"}
@@ -85,10 +85,25 @@ function SessionCard({
         </p>
       )}
 
-      <div className="mt-auto pt-3 border-t" style={{ borderColor: "var(--color-border)" }}>
-        <Button variant="ghost" size="sm" className="w-full gap-1 text-xs">
-          Resume <ArrowRight className="h-3 w-3" />
-        </Button>
+      <div
+        className="mt-auto pt-3 border-t"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <div className="flex gap-2">
+          {session.learningPathCreated && onStartTeaching && (
+            <Button
+              size="sm"
+              className="flex-1 gap-1 text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartTeaching(session.sessionId);
+              }}
+            >
+              <BookOpen className="h-3 w-3" />
+              Start Course
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );
@@ -97,15 +112,61 @@ function SessionCard({
 export default function Page() {
   const router = useRouter();
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
+  const [teacherSessions, setTeacherSessions] = useState<TeacherSession[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setSessions(SessionStore.getAllSessions());
+    setTeacherSessions(TeacherStore.getAllSessions());
     setIsLoaded(true);
   }, []);
 
   const handleResume = (sessionId: string) => {
     router.push(`/chat?session=${sessionId}`);
+  };
+
+  const handleStartTeaching = (advisorSessionId: string) => {
+    // Check if a teacher session already exists for this advisor session
+    const existingTeacherSession = teacherSessions.find(
+      (ts) => ts.learningPath.id === advisorSessionId,
+    );
+
+    if (existingTeacherSession) {
+      router.push(`/teach?session=${existingTeacherSession.sessionId}`);
+    } else {
+      // Create a new teacher session
+      // TODO: Get actual learning path from advisor session
+      // For now, create a sample learning path
+      const advisorSession = sessions.find(
+        (s) => s.sessionId === advisorSessionId,
+      );
+      if (!advisorSession) return;
+
+      const sampleLearningPath = {
+        id: advisorSessionId,
+        title: advisorSession.objective || "Learning Path",
+        description: `Personalized learning path for: ${advisorSession.objective}`,
+        objective: advisorSession.objective || "",
+        difficulty: advisorSession.skillLevel || "intermediate",
+        totalDuration: "12 weeks",
+        prerequisites: [],
+        milestones: [
+          {
+            id: "m1",
+            title: "Foundation Phase",
+            description: "Build your fundamental understanding",
+            estimatedWeeks: 4,
+            courses: [],
+            outcomes: ["Understand core concepts", "Build basic projects"],
+          },
+        ],
+        createdBy: "advisor" as const,
+        createdAt: new Date().toISOString(),
+      };
+
+      const teacherSessionId = TeacherStore.createSession(sampleLearningPath);
+      router.push(`/teach?session=${teacherSessionId}`);
+    }
   };
 
   const handleNewSession = () => {
@@ -176,6 +237,7 @@ export default function Page() {
                   key={session.sessionId}
                   session={session}
                   onResume={handleResume}
+                  onStartTeaching={handleStartTeaching}
                 />
               ))}
             </div>
