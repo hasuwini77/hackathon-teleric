@@ -5,7 +5,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
-function WavyParticles() {
+function WavyParticles({ theme = "dark" }: { theme?: "dark" | "light" }) {
   const pointsRef = useRef<THREE.Points>(null);
   
   // Create a grid of points for the wavy surface
@@ -55,17 +55,18 @@ function WavyParticles() {
       </bufferGeometry>
       <PointMaterial
         transparent
-        color="#3b82f6"
+        color={theme === "dark" ? "#3b82f6" : "#1e40af"}
         size={0.03}
         sizeAttenuation={true}
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
+        opacity={theme === "dark" ? 0.8 : 0.7}
       />
     </points>
   );
 }
 
-function FloatingBokeh() {
+function FloatingBokeh({ theme = "dark" }: { theme?: "dark" | "light" }) {
     const ref = useRef<THREE.Group>(null);
     const count = 100;
     const positions = useMemo(() => {
@@ -88,30 +89,34 @@ function FloatingBokeh() {
             <Points positions={positions} stride={3}>
                 <PointMaterial
                     transparent
-                    color="#a855f7"
+                    color={theme === "dark" ? "#a855f7" : "#3b82f6"}
                     size={0.2}
                     sizeAttenuation={true}
                     depthWrite={false}
-                    opacity={0.2}
-                    blending={THREE.AdditiveBlending}
+                    opacity={theme === "dark" ? 0.2 : 0.15}
+                    blending={theme === "dark" ? THREE.AdditiveBlending : THREE.NormalBlending}
                 />
             </Points>
         </group>
     );
 }
 
-export default function StylishBackground() {
+export default function StylishBackground({ theme = "dark" }: { theme?: "dark" | "light" }) {
+  const bgColor = theme === "dark" ? "#000308" : "#f8fafc";
+  
   return (
-    <div className="fixed inset-0 z-0 bg-black">
+    <div className={`fixed inset-0 z-0 transition-colors duration-1000 ${theme === "dark" ? "bg-black" : "bg-white"}`}>
       <Canvas camera={{ position: [0, 2, 8], fov: 60 }}>
-        <color attach="background" args={["#000308"]} />
-        <ambientLight intensity={0.2} />
+        <color attach="background" args={[bgColor]} />
+        <ambientLight intensity={theme === "dark" ? 0.2 : 0.5} />
         
-        <WavyParticles />
-        <FloatingBokeh />
+        <WavyParticles theme={theme} />
+        <FloatingBokeh theme={theme} />
         
-        <fog attach="fog" args={["#000308", 5, 20]} />
+        <fog attach="fog" args={[bgColor, 5, 20]} />
       </Canvas>
     </div>
   );
 }
+
+
