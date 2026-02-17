@@ -1,22 +1,10 @@
-"""Chat router — DISABLED, pending agent-based replacement.
+"""Chat router — DISABLED, replaced by agents/skye/ (LangGraph agent).
 
-This router is NOT registered in main.py. It will be replaced by an
-agentic architecture that handles:
-  - Multi-turn conversations with memory (AgentMemory)
-  - Extraction pipeline (skills, objective, background, etc.)
-  - Action scheduling (SAVE_LEARNING_PATH, SEARCH_WEB, SEND_TO_BACKEND)
-  - Auto-assignment of sessions to workspaces
-
-Setup when ready:
-  1. Build the SKYE Agent (Python) that wraps the LLM call with
-     extraction + action logic (port lib/chat-agent.ts → Python).
-  2. Replace `get_agent_response()` in chat_service.py with the agent.
-  3. Re-enable in main.py:
-       from app.routers import chat
-       app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
-
-Existing models used: ChatSession, ChatMessage (database/models/).
-Existing service:     chat_service.py (app/services/).
+The SKYE agent is now at /api/agent/threads/{thread_id}/stream (SSE).
+This legacy CRUD router is kept for direct DB access to chat sessions/messages
+if needed alongside the agent. To re-enable:
+  from app.routers import chat
+  app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 """
 import uuid
 

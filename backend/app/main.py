@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from agents.router import router as agent_router
 from app.routers import content, learning_paths, progress, search, skills, users, workspaces
 
 
@@ -29,10 +30,7 @@ app.include_router(skills.router, prefix="/api/skills", tags=["skills"])
 app.include_router(content.router, prefix="/api/content", tags=["content"])
 app.include_router(search.router, prefix="/api/search", tags=["search"])
 app.include_router(learning_paths.router, prefix="/api/learning-paths", tags=["learning-paths"])
-# Chat router disabled — will be replaced by an agent-based architecture.
-# To re-enable: uncomment below and add `chat` to the router import above.
-# from app.routers import chat
-# app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
+app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
 app.include_router(workspaces.router, prefix="/api/workspaces", tags=["workspaces"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 
